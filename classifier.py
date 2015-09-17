@@ -6,15 +6,15 @@ import re
 trainDir = "./train/"
 testDir = "./test/"
 
-mData = {}
-fData = {}
-mTokens = {}
-fTokens = {}
-p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
-
 class Counter(dict):
 	def __missing__(self, key):
 		return 0
+
+mData = {}
+fData = {}
+mTokens = Counter()
+fTokens = Counter()
+p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 
 def openData():
 	allData = os.listdir(trainDir)
@@ -40,10 +40,8 @@ def fileToEntry(fileName):
 def lineToTokens(line):
 	tokenArray = []
 	tokens = line.split()
-	#print(tokens)
 	for token in tokens:
 		token = normalize(token)
-		#print(token)
 		if token != '':
 			tokenArray.append(token)
 	return tokenArray
@@ -53,7 +51,7 @@ def normalize(str):
 	normWord = p.sub("", normWord)
 	return normWord
 
-def tokenToNgram(tokens, n):
+def tokensToNgrams(tokens, n):
 	ngrams = []
 	for i in range(n-1, len(tokens)):
 		ngram = ""
@@ -71,24 +69,9 @@ def tally(ngrams):
 		c[ngram] += 1
 	return c
 
-#def mergeTallies():
-
-def dictionary(lines):
-	word = lineToTokens(lines)
-	for i in range(1,4):
-		ngrams = tokenToNgram(word, i)
-		sorted_ngrams = sortCount(tally(ngrams))
-		for j in range(0,11):
-			print(sorted_ngrams[j])
-		
-		for j in range(1,5):
-			count = 0;
-			for word in sorted_ngrams:
-				if word[1] == j:
-					count += 1
-			print(str(count) + " " + str(i) + "-grams occur " + str(j) + " time(s)")
-		print( "Unique n-grams with n=" + str(i) + ": " + str(len(sorted_ngrams)))
-		print ("")
+def mergeCounters(c1, c2):
+    for key in c2.keys():
+        c1[key] += c2[key]
 
 def sortCount(dict):
 	dict_sorted = sorted(dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -96,14 +79,47 @@ def sortCount(dict):
 	
 openData()
 
+maleNgrams = []
+
+for key in mData.keys():
+    tokens = lineToTokens(mData[key])
+    ngrams = tokensToNgrams(tokens,4)
+    for ngram in ngrams:
+        maleNgrams.append(ngram)
+
+NgramsTally = tally(maleNgrams)
+
+NgramsTally = sortCount(NgramsTally)
+
+print(len(NgramsTally))
+
+#~ def dictionary(lines):
+	#~ word = lineToTokens(lines)
+	#~ for i in range(1,4):
+		#~ ngrams = tokenToNgram(word, i)
+		#~ sorted_ngrams = sortCount(tally(ngrams))
+		#~ for j in range(0,11):
+			#~ print(sorted_ngrams[j])
+		
+		#~ for j in range(1,5):
+			#~ count = 0;
+			#~ for word in sorted_ngrams:
+				#~ if word[1] == j:
+					#~ count += 1
+			#~ print(str(count) + " " + str(i) + "-grams occur " + str(j) + " time(s)")
+		#~ print( "Unique n-grams with n=" + str(i) + ": " + str(len(sorted_ngrams)))
+		#~ print ("")
+
+
 #files = fData.values()
 #print(files)
 
-dest = dict(list(fData.items()) + list(mData.items()))
 #print(dest)
 
-for key in dest.items():
-	dictionary(dest[key].values())
+#~ dest = dict(list(fData.items()) + list(mData.items()))
+
+#~ for key in dest.items():
+	#~ dictionary(dest[key].values())
 
 
 
