@@ -10,7 +10,7 @@ mData = {}
 fData = {}
 mTokens = {}
 fTokens = {}
-p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
+p = re.compile("[<>~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 
 class Counter(dict):
 	def __missing__(self, key):
@@ -31,12 +31,6 @@ def fileToEntry(fileName):
 	tweetFile = open(fileName, errors='replace')
 	return tweetFile.read().encode('ascii','ignore').decode('ascii')
 
-# def dictToLines(dic):
-	# lines = []
-	# for key in dic:
-		# lines.append(dic[key].splitlines())
-	# return lines
-	
 def lineToTokens(line):
 	tokenArray = []
 	tokens = line.split()
@@ -53,7 +47,7 @@ def normalize(str):
 	normWord = p.sub("", normWord)
 	return normWord
 
-def tokenToNgram(tokens, n):
+def tokensToNgrams(tokens, n):
 	ngrams = []
 	for i in range(n-1, len(tokens)):
 		ngram = ""
@@ -64,53 +58,49 @@ def tokenToNgram(tokens, n):
 				ngram = tokens[i-j] + " " + ngram
 		ngrams.append(ngram)
 	return ngrams
-
+	
 def tally(ngrams):
 	c = Counter()
 	for ngram in ngrams:
 		c[ngram] += 1
 	return c
 
-#def mergeTallies():
-
-def dictionary(lines):
-	word = lineToTokens(lines)
-	for i in range(1,4):
-		ngrams = tokenToNgram(word, i)
-		sorted_ngrams = sortCount(tally(ngrams))
-		for j in range(0,11):
-			print(sorted_ngrams[j])
-		
-		for j in range(1,5):
-			count = 0;
-			for word in sorted_ngrams:
-				if word[1] == j:
-					count += 1
-			print(str(count) + " " + str(i) + "-grams occur " + str(j) + " time(s)")
-		print( "Unique n-grams with n=" + str(i) + ": " + str(len(sorted_ngrams)))
-		print ("")
+def mergeCounters(c1, c2):
+    for key in c2.keys():
+        c1[key] += c2[key]
 
 def sortCount(dict):
 	dict_sorted = sorted(dict.items(), key=operator.itemgetter(1), reverse=True)
 	return dict_sorted
-	
+
+def frequency(ngrams, n):
+    for i in range(1,5):
+        count = 0
+        for ngram in ngrams:
+            if ngram[1] == i:
+                count += 1
+    return count
+
 openData()
 
-#files = fData.values()
-#print(files)
+maleNgrams = []
 
-dest = dict(list(fData.items()) + list(mData.items()))
-#print(dest)
+for key in mData.keys():
+    tokens = lineToTokens(mData[key])
+    for i in range(1,4):
+        ngrams = tokensToNgrams(tokens,i)
 
-for key in dest.items():
-	dictionary(dest[key].values())
+        for ngram in ngrams:
+            maleNgrams.append(ngram)
+            
+        NgramsTally = tally(maleNgrams)
+        NgramsTally = sortCount(NgramsTally)
+        frequency(NgramsTally, i)
+            #~ for j in range(1,5):
+                #~ count = 0
+                #~ if NgramsTally == j: count += 1
+                #print(str(count) + " " + str(i) + "-gram are observed" + str(j) + "times")
+print("unique n-grams with n=" + str(i) + ": " + str(len(NgramsTally)))
 
-
-
-
-
-
-
-
-
+print(type(NgramsTally))
 
