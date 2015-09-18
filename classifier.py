@@ -96,11 +96,7 @@ for key in mData.keys():
         NgramsTally = tally(maleNgrams)
         NgramsTally = sortCount(NgramsTally)
         frequency(NgramsTally, i)
-            #~ for j in range(1,5):
-                #~ count = 0
-                #~ if NgramsTally == j: count += 1
-                #print(str(count) + " " + str(i) + "-gram are observed" + str(j) + "times")
-print("unique n-grams with n=" + str(i) + ": " + str(len(NgramsTally)))
+
 
 print(type(NgramsTally))
 
