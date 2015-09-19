@@ -6,15 +6,16 @@ import re
 trainDir = "./train/"
 testDir = "./test/"
 
-mData = {}
-fData = {}
-mTokens = {}
-fTokens = {}
-p = re.compile("[<>~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
-
 class Counter(dict):
 	def __missing__(self, key):
 		return 0
+
+mData = {}
+fData = {}
+mTokens = Counter()
+fTokens = Counter()
+n = 0
+p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 
 def openData():
 	allData = os.listdir(trainDir)
@@ -31,13 +32,17 @@ def fileToEntry(fileName):
 	tweetFile = open(fileName, errors='replace')
 	return tweetFile.read().encode('ascii','ignore').decode('ascii')
 
+# def dictToLines(dic):
+	# lines = []
+	# for key in dic:
+		# lines.append(dic[key].splitlines())
+	# return lines
+	
 def lineToTokens(line):
 	tokenArray = []
 	tokens = line.split()
-	#print(tokens)
 	for token in tokens:
 		token = normalize(token)
-		#print(token)
 		if token != '':
 			tokenArray.append(token)
 	return tokenArray
@@ -58,7 +63,7 @@ def tokensToNgrams(tokens, n):
 				ngram = tokens[i-j] + " " + ngram
 		ngrams.append(ngram)
 	return ngrams
-	
+
 def tally(ngrams):
 	c = Counter()
 	for ngram in ngrams:
@@ -73,30 +78,56 @@ def sortCount(dict):
 	dict_sorted = sorted(dict.items(), key=operator.itemgetter(1), reverse=True)
 	return dict_sorted
 
-def frequency(ngrams, n):
-    for i in range(1,5):
-        count = 0
-        for ngram in ngrams:
-            if ngram[1] == i:
-                count += 1
-    return count
+def vocabulary(data, n):
+	for int in range(0,3):
+		n += 1
+		
+		for key in mData.keys():
+			tokens = lineToTokens(mData[key])
+			ngrams = tokensToNgrams(tokens,n)
+			for ngram in ngrams:
+				totalNgrams.append(ngram)
+
+		NgramsTally = tally(totalNgrams)
+
+		NgramsTally = sortCount(NgramsTally)
+		
+		if n == 1:
+			print("Top ten unigrams: ")
+			for j in range(0,11):
+				print(NgramsTally[j])
+		#print(type(NgramsTally))
+
+		print("Unique "+ str(n) +"-grams in the corpus: " + str(len(NgramsTally)))
+		for i in range(1,5):
+			count = 0
+			for ngram in NgramsTally:
+				if ngram[1] == i:
+					count = count + 1
+			print(str(count) + " " + str(n) + "-grams were observed for " + str(i) + " time(s)")
+		print("\n")
+	
+def selectWords(data):
+	for key in mData.keys():
+			tokens = lineToTokens(mData[key])
+			ngrams = tokensToNgrams(tokens,1)
+			for ngram in ngrams:
+				totalNgrams.append(ngram)
+
+	NgramsTally = tally(totalNgrams)
+	NgramsTally = sortCount(NgramsTally)
+	unigramList = []
+	for ngram in NgramsTally:
+		if ngram[1] > 24:
+			unigramList.append(ngram)
+	return unigramList
 
 openData()
 
-maleNgrams = []
+#mData.update(fData)
+totalNgrams = []
+totalNgramsM = selectWords(mData)
+totalNgramsF = selectWords(fData)
 
-for key in mData.keys():
-    tokens = lineToTokens(mData[key])
-    for i in range(1,4):
-        ngrams = tokensToNgrams(tokens,i)
-
-        for ngram in ngrams:
-            maleNgrams.append(ngram)
-            
-        NgramsTally = tally(maleNgrams)
-        NgramsTally = sortCount(NgramsTally)
-        frequency(NgramsTally, i)
-
-
-print(type(NgramsTally))
+#vocabulary(mData, n)
 
