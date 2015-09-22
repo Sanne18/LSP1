@@ -3,6 +3,7 @@
 import os, operator
 import re
 from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 
 trainDir = "./train/"
 testDir = "./test/"
@@ -22,6 +23,9 @@ p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 stopwordsEn = stopwords.words('english')
 stopwordsNL = stopwords.words('dutch')
 twitterSyntax = ['RT', 'rt', 'usermention']
+
+stemmerEn = SnowballStemmer('english')
+stemmerNL = SnowballStemmer('dutch')
 
 def openData():
 	allData = os.listdir(trainDir)
@@ -156,19 +160,23 @@ def probTrain(ngramFrequency, totalWordNumber, k, V):
 
 openData()
 
+line = fData['F-train1.txt']
+line = lineToTokens(line)
+print(line)
+
 # ----------------------
 #the line below will merge mData and fData for the assignment that requires to look at all the documents.
-mData.update(fData)
+#mData.update(fData)
 # ----------------------
 
-
 # Create the list of words and frequencies of occurence for males and females.
- #nGramsM = bagOfWords(mData)
-#~ nGramsF = bagOfWords(fData)
+#nGramsM = bagOfWords(mData)
+#nGramsF = bagOfWords(fData)
 
 # ----------------------
 # For the assignment Vocabulary, these function can be used.
-vocabulary(mData, n)
+#vocabulary(mData, n)
+#vocabulary(fData, n)
 # ----------------------
 
 #~ k = 0.01
