@@ -131,7 +131,7 @@ def bagOfWords(data, n):
 
 
 # The function trainModel calculates and stores the n-grams, probabilities and counts in a new dict trainedData.
-def trainModel(data, n, k):
+def train(data, n, k):
 	n += 1
 	totalWordNumber = 0
 	for file in data:
@@ -154,11 +154,42 @@ def trainModel(data, n, k):
 def probTrain(ngramFrequency, totalWordNumber, k, V):
 	return (float(ngramFrequency + k)) / (float(totalWordNumber) + k * V)
 
-openData()
+def test(testDir, n, k):
+	# we need a new array to store the test data in
+	testArray = []
+
+	testData = os.listdir(testDir)
+	testData.sort()
+	
+	# we need to loop through the test data and add them to the testData dictionary
+	for file in testData:
+		tweet = [file]
+		# read test data in the same way as train data, but then do not separate female from male (because, of course, this distinction needs to be classified by the classifier).
+		fileToEntry(testDir, tweet)
+		if tweet[0].endswith(".txt"):
+			testArray.append(tweet)
+	
+	# now we need to calculate the probabilities and classify the tweets!
+	# we start with the count of correctly classified tweets set to zero
+	correctCount = 0
+	
+	# then we calculate probability using the trainedM and trainedF dictionaries
+	# we loop over every file, because we would like to classify all of them
+	for tweet in testArray:
+		testM = testProb(tweet, mTrained, n)
+		testF = testProb(tweet, fTrained, n)
+		
+	# then we need to compare the probabilities and assign the tweets to a class
+	# of course, if our classifier is right we will add 1 to the correctCount.
+	
+def testProb(tweet, trainData, n):
+	
+	
+open()
 
 # ----------------------
 #the line below will merge mData and fData for the assignment that requires to look at all the documents.
-mData.update(fData)
+#mData.update(fData)
 # ----------------------
 
 
@@ -168,12 +199,12 @@ mData.update(fData)
 
 # ----------------------
 # For the assignment Vocabulary, these function can be used.
-vocabulary(mData, n)
+#vocabulary(mData, n)
 # ----------------------
 
-#~ k = 0.01
-#~ trainedM = trainModel(mData, n, k)
-#~ trainedF = trainModel(fData, n, k)
-
+k = 0.01
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testdir, n, k)
 #print(trainedM)
 

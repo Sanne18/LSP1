@@ -4,6 +4,7 @@ import os, operator
 import re
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+from langdetect import detect
 
 trainDir = "./train/"
 testDir = "./test/"
@@ -57,6 +58,11 @@ def lineToTokens(line):
 def normalize(str):
 	normWord = str.lower()
 	normWord = p.sub("", normWord)
+	# try to stem the words as good as possible. However, it is hard for the detector to distinguish only between En and NL words.
+	# "ik" for example is Dutch, but outputs Swedish.
+	normWord = stemmerEn.stem(normWord)
+	#~ elif detect(normWord) == 'nl':
+		#~ normWord = stemmerNL.stem(normWord)
 	return normWord
 
 def tokensToNgrams(tokens, n):
@@ -162,11 +168,11 @@ openData()
 
 line = fData['F-train1.txt']
 line = lineToTokens(line)
-print(line)
+#print(line)
 
 # ----------------------
 #the line below will merge mData and fData for the assignment that requires to look at all the documents.
-#mData.update(fData)
+mData.update(fData)
 # ----------------------
 
 # Create the list of words and frequencies of occurence for males and females.
@@ -175,7 +181,7 @@ print(line)
 
 # ----------------------
 # For the assignment Vocabulary, these function can be used.
-#vocabulary(mData, n)
+vocabulary(mData, n)
 #vocabulary(fData, n)
 # ----------------------
 
