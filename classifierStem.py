@@ -23,7 +23,7 @@ p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 #the two stopwords list taken from nltk corpus
 stopwordsEn = stopwords.words('english')
 stopwordsNL = stopwords.words('dutch')
-twitterSyntax = ['RT', 'rt', 'usermention']
+twitterSyntax = ['RT', 'rt', 'usermention', 'userment']
 
 stemmerEn = SnowballStemmer('english')
 stemmerNL = SnowballStemmer('dutch')

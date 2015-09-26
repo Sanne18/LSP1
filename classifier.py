@@ -181,12 +181,16 @@ def test(testDir, n, k):
 		
 		# if the probability for male is higher than female and the class is indeed male then add one to correctly classified docs
 		if testM > testF:
-			if key[0].startswith("M"):
+			if key.startswith("M"):
 				correctCount += 1
+			else:
+				print("Incorrectly classified: " + key)
 		# else classified as female, check if this is indeed correct, then add one to counter
 		else:
-			if key[0].startswith("F"):
+			if key.startswith("F"):
 				correctCount += 1
+			else:
+				print("Incorrectly classified: " + key)
 	
 	# print outcomes
 	print("From the " + str(len(testDict.keys())) + " tweets are "+ str(correctCount) + " correctly classified")
