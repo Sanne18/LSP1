@@ -3,6 +3,7 @@
 import os, operator
 import re
 from nltk.corpus import stopwords
+from math import log
 
 trainDir = "./train/"
 testDir = "./test/"
@@ -137,7 +138,7 @@ def train(data, n, k):
 	for file in data:
 		totalWordNumber += len(file)
 	dataFrequencies = bagOfWords(data, n)
-	# a new dictionary trainedData {} to store the trained data.
+	# a new array trainedData {} to store the trained data.
 	trainedData = {}
 	# now we want to calculate the probabilities for each word in the data we are using
 	for i in range(0, len(dataFrequencies)):
@@ -155,19 +156,17 @@ def probTrain(ngramFrequency, totalWordNumber, k, V):
 	return (float(ngramFrequency + k)) / (float(totalWordNumber) + k * V)
 
 def test(testDir, n, k):
-	# we need a new array to store the test data in
-	testArray = []
+	n += 1
+	# we need a new dict to store the test data in
+	testDict = {}
 
 	testData = os.listdir(testDir)
 	testData.sort()
-	
 	# we need to loop through the test data and add them to the testData dictionary
 	for file in testData:
-		tweet = [file]
 		# read test data in the same way as train data, but then do not separate female from male (because, of course, this distinction needs to be classified by the classifier).
-		fileToEntry(testDir, tweet)
-		if tweet[0].endswith(".txt"):
-			testArray.append(tweet)
+		if file.startswith("F") or file.startswith("M"):
+			testDict[file] = fileToEntry(testDir + file)
 	
 	# now we need to calculate the probabilities and classify the tweets!
 	# we start with the count of correctly classified tweets set to zero
@@ -175,17 +174,48 @@ def test(testDir, n, k):
 	
 	# then we calculate probability using the trainedM and trainedF dictionaries
 	# we loop over every file, because we would like to classify all of them
-	for tweet in testArray:
-		testM = testProb(tweet, mTrained, n)
-		testF = testProb(tweet, fTrained, n)
+	for key in testDict.keys():
+		tokens = lineToTokens(testDict[key])
+		testM = testProb(tokens, trainedM, n)
+		testF = testProb(tokens, trainedF, n)
 		
-	# then we need to compare the probabilities and assign the tweets to a class
-	# of course, if our classifier is right we will add 1 to the correctCount.
+		# if the probability for male is higher than female and the class is indeed male then add one to correctly classified docs
+		if testM > testF:
+			if key[0].startswith("M"):
+				correctCount += 1
+		# else classified as female, check if this is indeed correct, then add one to counter
+		else:
+			if key[0].startswith("F"):
+				correctCount += 1
 	
-def testProb(tweet, trainData, n):
+	# print outcomes
+	print("From the " + str(len(testDict.keys())) + " tweets are "+ str(correctCount) + " correctly classified")
+	print("The accuracy for k = " + str(k) + " is: "+ str(float(correctCount)/len(testDict.keys())))
+	print("\n")
+
 	
+def testProb(tokens, trainData, n):
+	prob = 1
+	ngrams = []
+	#make trainData a dict
+	trainData = dict(trainData)
+	# we need to calculate the log of the sum of the probabilities for each word.
+	for i in range(n-1, len(tokens)):
+		ngram = ""
+		for j in range(0, n):
+			if j == 0:
+				ngram = tokens[i-j] + ngram
+			else:
+				ngram = tokens[i-j] + " " + ngram
+		# we want to see if the ngram is in the trained data set with the associated probability
+		if ngram in trainData.keys():
+			# we need to take the log of the probability stored in trainData to avoid underflow
+			prob += log(trainData[ngram][0],2)
+		else:
+			prob += log(trainData[""][0],2)
+	return prob
 	
-open()
+openData()
 
 # ----------------------
 #the line below will merge mData and fData for the assignment that requires to look at all the documents.
@@ -205,6 +235,42 @@ open()
 k = 0.01
 trainedM = train(mData, n, k)
 trainedF = train(fData, n, k)
-test(testdir, n, k)
+test(testDir, n, k)
+
+k = 0.1
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 0.5
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 1
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 2
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 10
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 50
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
+k = 100
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+test(testDir, n, k)
+
 #print(trainedM)
 
