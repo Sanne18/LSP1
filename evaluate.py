@@ -14,22 +14,22 @@ def read_predictions(filename):
 ground_truth_file = sys.argv[1]
 results_file = sys.argv[2]
 
-print "Results file " + results_file
-print "Groundtruth file " + ground_truth_file
+print( "Results file " + results_file)
+print ("Groundtruth file " + ground_truth_file)
 
 results_map = read_predictions(results_file)
 ground_truth_map = read_predictions(ground_truth_file)
 
 # Calculate accuracy and print incorrect predictions
 correct = 0
-for ID,label in ground_truth_map.iteritems():
+for ID,label in ground_truth_map.items():
     if ID not in results_map:
-        print "Missing predictions for " + ID
+        print ("Missing predictions for " + ID)
     elif results_map[ID] == label:
         correct = correct + 1
     else:
-        print "Incorrect " + ID
+        print ("Incorrect " + ID)
 
 # Print summary
-print str(correct) + " out of " + str(len(ground_truth_map)) + " were correct!"
-print "accuracy " + str(float(correct)/len(ground_truth_map))
+print( str(correct) + " out of " + str(len(ground_truth_map)) + " were correct!")
+print ("accuracy " + str(float(correct)/len(ground_truth_map)))
