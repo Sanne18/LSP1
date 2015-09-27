@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from langdetect import detect
 from math import log
 from nltk.stem.porter import *
+import time
 #from evaluate import read_predictions(file)
 
 trainDir = "./train/"
@@ -23,8 +24,8 @@ n = 0
 p = re.compile("[~.,'\":;!@#$%^&*()_\-+=?/|\u201C\u201D\u2018\u2019]")
 
 #the two stopwords list taken from nltk corpus
-stopwordsEn = stopwords.words('english')
-stopwordsNL = stopwords.words('dutch')
+#stopwordsEn = stopwords.words('english')
+#stopwordsNL = stopwords.words('dutch')
 twitterSyntax = ['RT', 'rt', 'usermention', 'userment']
 
 stemmerEn = PorterStemmer()
@@ -51,7 +52,8 @@ def lineToTokens(line):
 		token = normalize(token)
 		# filter tokens on stopwords and very short words
 		if token != '':
-			if token not in stopwordsNL and token not in stopwordsEn and token not in twitterSyntax:
+			#token not in stopwordsNL and token not in stopwordsEn and token 
+			if token not in twitterSyntax:
 				if len(token) > 2:
 					tokenArray.append(token)
 	return tokenArray
@@ -62,8 +64,6 @@ def normalize(str):
 	# try to stem the words as good as possible. However, it is hard for the detector to distinguish only between En and NL words.
 	# "ik" for example is Dutch, but outputs Swedish.
 	normWord = stemmerEn.stem(normWord)
-	#~ elif detect(normWord) == 'nl':
-		#~ normWord = stemmerNL.stem(normWord)
 	if normWord.endswith('j'):
 		normWord= normWord[:-1]
 	elif normWord.endswith('v'):
@@ -162,11 +162,25 @@ def train(data, n, k):
 	trainedData = sortCount(trainedData)
 	return trainedData
 
+def filter(set0, set1, treshold):
+	set0 = dict(set0)
+	set1 = dict(set1)
+	copy0 = dict(set0)
+	copy1 = dict(set1)
+	for key in set0.keys():
+		if key in set1.keys():
+			chance = copy0[key][0] / copy1[key][0]
+			if chance > 1: chance = 1/chance
+			if chance > treshold:
+				del copy0[key]
+				del copy1[key]
+	return [copy0, copy1]
+
 # The function probTrain calculates and returns the estimated conditional probabilities for the n-grams for females and males separately.		
 def probTrain(ngramFrequency, totalWordNumber, k, V):
 	return (float(ngramFrequency + k)) / (float(totalWordNumber) + k * V)
 
-def test(testDir, n, k):
+def test(testDir, n, k, filteredSets):
 	n += 1
 	# we need a new dict to store the test data in
 	testDict = {}
@@ -187,33 +201,35 @@ def test(testDir, n, k):
 	# we loop over every file, because we would like to classify all of them
 	for key in testDict.keys():
 		tokens = lineToTokens(testDict[key])
-		testM = testProb(tokens, trainedM, n)
-		testF = testProb(tokens, trainedF, n)
+		testM = testProb(tokens, filteredSets[0], n)
+		testF = testProb(tokens, filteredSets[1], n)
 		
 		# if the probability for male is higher than female and the class is indeed male then add one to correctly classified docs
 		if testM > testF:
 			if key.startswith("M"):
 				correctCount += 1
-			else:
-				print("Incorrectly classified: " + key)
+			#else:
+				#print("Incorrectly classified: " + key)
 		# else classified as female, check if this is indeed correct, then add one to counter
 		else:
 			if key.startswith("F"):
 				correctCount += 1
-			else:
-				print("Incorrectly classified: " + key)
-	
+			#else:
+				#print("Incorrectly classified: " + key)
+	accuracy = float(correctCount)/len(testDict.keys())
+	testList = [len(testDict.keys()), correctCount, accuracy]
+	return testList
 	# print outcomes
-	print("From the " + str(len(testDict.keys())) + " tweets are "+ str(correctCount) + " correctly classified")
-	print("The accuracy for k = " + str(k) + " is: "+ str(float(correctCount)/len(testDict.keys())))
-	print("\n")
+	#print("From the " + str(len(testDict.keys())) + " tweets are "+ str(correctCount) + " correctly classified")
+	#print("The accuracy for k = " + str(k) + " is: "+ str(float(correctCount)/len(testDict.keys())))
+	#print("\n")
 
 	
 def testProb(tokens, trainData, n):
 	prob = 1
 	ngrams = []
-	#make trainData a dict
 	trainData = dict(trainData)
+
 	# we need to calculate the log of the sum of the probabilities for each word.
 	for i in range(n-1, len(tokens)):
 		ngram = ""
@@ -231,7 +247,6 @@ def testProb(tokens, trainData, n):
 	return prob
 	
 def charWords(train1, train2):
-	# we would like to work with dicts, so convert the data which are of type list to dict
 	train1 = dict(train1)
 	train2 = dict(train2)
 	# we would like to train the rank in a new dict
@@ -248,8 +263,8 @@ def charWords(train1, train2):
 	
 	#print(sort_wordRank)
 	#we would like to print the top 10 characteristic words for the train1 
-	for i in range(0,100):
-		print(sort_wordRank[i])
+	#for i in range(0,100):
+		#print(sort_wordRank[i])
 
 
 openData()
@@ -283,10 +298,25 @@ openData()
 #~ trainedF = train(fData, n, k)
 #~ test(testDir, n, k)
 
-#~ k = 10
-#~ trainedM = train(mData, n, k)
-#~ trainedF = train(fData, n, k)
-#~ test(testDir, n, k)
+k = 10
+trainedM = train(mData, n, k)
+trainedF = train(fData, n, k)
+accs = []
+max = 0
+maxindex = 0
+for i in range(21):
+	filteredSets = filter(trainedM, trainedF, .8+i/100)
+	testList = test(testDir, n, k, filteredSets)
+	tweetTotal = testList[0]
+	correctCount = testList[1]
+	accs.append(testList[2])
+	if accs[i] > max:
+		max = accs[i]
+		maxindex = i
+	print("From the " + str(tweetTotal) + " tweets are "+ str(correctCount) + " correctly classified")
+	print("With a treshold of " + str(.8+i/100) + " the accuracy is " + str(accs[i]))
+print("The highest accuracy is at the threshold of " + str(maxindex) + " with an accuracy of " + str(max))
+
 
 #~ k = 50
 #~ trainedM = train(mData, n, k)
@@ -301,13 +331,13 @@ openData()
 
 # ----------------------
 # Assignment 6 - Characteristic words with k = 10
-k = 10
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 10
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
 #~ print("Top 10 characteristic words (with k =  " + str(k) + ") for males: ")
 #charWords(trainedM, trainedF)
 #~ print("Top 10 characteristic words (with k =  " + str(k) + ") for females: ")
-charWords(trainedF, trainedM)
+#~ charWords(trainedF, trainedM)
 # ----------------------
