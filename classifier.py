@@ -223,7 +223,7 @@ openData()
 
 # ----------------------
 #the line below will merge mData and fData for the assignment that requires to look at all the documents.
-#mData.update(fData)
+mData.update(fData)
 # ----------------------
 
 
@@ -233,48 +233,48 @@ openData()
 
 # ----------------------
 # For the assignment Vocabulary, these function can be used.
-#vocabulary(mData, n)
+vocabulary(mData, n)
 # ----------------------
 
-k = 0.01
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 0.01
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 0.1
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 0.1
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 0.5
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 0.5
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 1
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 1
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 2
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 2
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 10
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 10
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 50
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 50
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
-k = 100
-trainedM = train(mData, n, k)
-trainedF = train(fData, n, k)
-test(testDir, n, k)
+#~ k = 100
+#~ trainedM = train(mData, n, k)
+#~ trainedF = train(fData, n, k)
+#~ test(testDir, n, k)
 
 #print(trainedM)
 
