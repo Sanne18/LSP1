@@ -218,7 +218,7 @@ def test(testDir, n, k, filteredSets):
 	# we loop over every file, because we would like to classify all of them
 	for key in testDict.keys():
 		tokens = lineToTokens(testDict[key])
-		testResults = testProb(tokens, n, k, filteredSets)
+		testResults = testProb(tokens, k, filteredSets)
 		#testF = testProb(tokens, n, k, filteredSets)
 		
 		# if the probability for male is higher than female and the class is indeed male then add one to correctly classified docs
@@ -240,13 +240,17 @@ def test(testDir, n, k, filteredSets):
 
 # This function calculates the test probabilities. The chance for a document to be of class X/Y. 
 # It returns this probability.
-def testProb(tokens, n, k, filteredSets):
+def testProb(tokens, k, filteredSets):
 
 	mChance = float(235/600)
 	fChance = float(365/600)
 	maleTrainData = filteredSets[0]
 	femaleTrainData = filteredSets[1]
-	V = len(filteredSets)
+	
+	keylist = filteredSets[0].keys()
+	mydata = dict((k,','.join(set(map(lambda d: d[k], filteredSets)))) for k in keylist)
+	V = len(mydata)
+	print( "V is zo lang: "+ str(V))
 	m_chanceList = []
 	f_chanceList = []
 	m_logProb = 0
@@ -270,10 +274,10 @@ def testProb(tokens, n, k, filteredSets):
 			female_chance = (k) / (len(femaleTrainData) + k * V)
 			f_chanceList.append((ngram, female_chance))
 
-	for i in range(0, m_chanceList-1):
-		m_logProb += log(m_chanceList[i][1],2)
+	for item in m_chanceList:
+		m_logProb += log(item[1],2)
 	for i in f_chanceList:
-		f_logProb += log(f_chanceList[i][1],2)
+		f_logProb += log(item[1],2)
 	
 	#print( "logprob male: " + str(m_logProb))
 	#print( "logprob female: " + str(f_logProb))
@@ -337,12 +341,12 @@ trainedM = train(mData, n)
 trainedF = train(fData, n)
 filteredSets = filter(trainedM, trainedF, .88)
 testList = test(testDir, n, k, filteredSets)
-tweetTotal = testList[0]
-correctCount = testList[1]
-acc = testList[2]
-print("K is  " + str(k))
-print(str(correctCount) + " out of "+ str(tweetTotal)  + " were correctly classified")
-print("The accuracy is " + str(acc))
+#~ tweetTotal = testList[0]
+#~ correctCount = testList[1]
+#~ acc = testList[2]
+#~ print("K is  " + str(k))
+#~ print(str(correctCount) + " out of "+ str(tweetTotal)  + " were correctly classified")
+#~ print("The accuracy is " + str(acc))
 #~ # ----------------------
 
 # ----------------------
