@@ -132,8 +132,6 @@ def vocabulary(data, n):
 			print(str(count) + " " + str(n) + "-grams were observed for " + str(i) + " time(s)")
 		print("\n")
 	
-
-
 # The function bagOfWords prepares the data by calling the functions lineToTokens and tokensToNgrams on the data (mData and fData)
 # The ngrams are added to an list, counted, sorted and included for further analysis if they occur 25 times or more.
 def bagOfWords(data, n):
@@ -244,8 +242,8 @@ def test(testDir, n, k, filteredSets):
 # It returns this probability.
 def testProb(tokens, n, k, filteredSets):
 
-	mChance = 0.5
-	fChance = 0.5
+	mChance = float(235/600)
+	fChance = float(365/600)
 	maleTrainData = filteredSets[0]
 	femaleTrainData = filteredSets[1]
 	V = len(filteredSets)
@@ -272,7 +270,7 @@ def testProb(tokens, n, k, filteredSets):
 			female_chance = (k) / (len(femaleTrainData) + k * V)
 			f_chanceList.append((ngram, female_chance))
 
-	for i in m_chanceList:
+	for i in range(0, m_chanceList-1):
 		m_logProb += log(m_chanceList[i][1],2)
 	for i in f_chanceList:
 		f_logProb += log(f_chanceList[i][1],2)
